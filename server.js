@@ -1,3 +1,4 @@
+// import cors from 'cors';
 import express from 'express';
 const app = express();
 import dotenv from 'dotenv';
@@ -15,11 +16,16 @@ import jobsRouter from './routes/jobsRoutes.js';
 import errorHandlerMiddleware from './middleware/error-handler.js';
 import notFoundMiddleware from './middleware/not-found.js';
 
+// app.use(cors());
 app.use(express.json());
 
 app.get('/',(req,res) =>{
     // throw new Error('error');
-    res.send('welcome!')
+    res.send({msg: 'welcome!'})
+})
+app.get('/api/v1',(req,res) =>{
+  // throw new Error('error');
+  res.send({msg: 'API welcome!'})
 })
 
 app.use('/api/v1/auth', authRouter);
