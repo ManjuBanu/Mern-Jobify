@@ -1,6 +1,6 @@
 import User from '../models/User.js';
 import { StatusCodes } from 'http-status-codes';
-import {BadRequestError}  from '../errors/index.js';
+import {BadRequestError, UnAuthenticatedError}  from '../errors/index.js';
 
 //using try catch methods & imported express-async-errors packages no need of passing next , this package will take care
 // const register =async (req,res,next) => {
@@ -39,7 +39,31 @@ const register =async (req,res) => {
 }
 
 const login =  async (req,res) => {
-    res.send('login user')
+const {email, password} = req.body;
+
+  if(!email || !password){
+    throw new BadRequestError("Please Provide all values")
+  }
+
+  //we are adding password to our user object to compare password
+const user = await User.findOne({email}).select('+password')
+
+  if(!user){
+    throw new UnAuthenticatedError('Invalid Credentials')
+  }
+
+  const isPasswordCorrect = await user.comparePassword(password)
+
+  if(!isPasswordCorrect){
+    throw new UnAuthenticatedError('Invalid Credentials')
+  }
+
+  const token = user.createJWT()
+
+  //we are removing password key from our object for security purpose
+  user.password = undefined;
+
+  res.status(StatusCodes.OK).json({ user,token,location:user.location })
 }
 
 
